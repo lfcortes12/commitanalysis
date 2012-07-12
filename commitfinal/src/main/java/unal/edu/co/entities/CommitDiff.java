@@ -20,6 +20,10 @@ public class CommitDiff implements Serializable {
 
     @Lob()
 	private byte[] diff;
+    
+    @Lob()
+    @Column(name="processed_diff")
+	private byte[] processedDiff;
 
 	@Column(name="project_name")
 	private String projectName;
@@ -49,6 +53,14 @@ public class CommitDiff implements Serializable {
 
 	public void setProjectName(String projectName) {
 		this.projectName = projectName;
+	}
+
+	public byte[] getProcessedDiff() {
+		return processedDiff;
+	}
+
+	public void setProcessedDiff(byte[] processedDiff) {
+		this.processedDiff = processedDiff;
 	}
 
 }
