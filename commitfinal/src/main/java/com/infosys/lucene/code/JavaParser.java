@@ -16,10 +16,12 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class JavaParser {
 
+	@SuppressWarnings("deprecation")
 	private ASTParser _parser = ASTParser.newParser(AST.JLS2);
 	private CompilationUnit _unit = null;
 	private JClass _class = null;
 
+	@SuppressWarnings("resource")
 	public  void setSource(String f) {
 		//BufferedReader reader;
 		try {
@@ -40,6 +42,7 @@ public class JavaParser {
 
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public  ArrayList getImportDeclarations() {
 		List imports = _unit.imports();
 		if(imports.size() == 0) return null;
@@ -52,6 +55,7 @@ public class JavaParser {
 		return importDecl;
 	}
 
+	@SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
 	public  ArrayList getComments() {
 		List comments = _unit.getCommentList();
 		if(comments.size() == 0)return null;
@@ -67,6 +71,7 @@ public class JavaParser {
 		return javaDocComments;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public JClass getDeclaredClass() {
 		List types = _unit.types();
 		ListIterator typeIter = types.listIterator(0);
@@ -79,6 +84,7 @@ public class JavaParser {
 		return null;
 	}
 
+	@SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
 	private  void setClassInformation(JClass cls ,TypeDeclaration object) {
 		String clsName = object.getName().toString();
 		cls.className = clsName;
@@ -104,6 +110,7 @@ public class JavaParser {
 
 	}
 
+	@SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
 	private void addMethods(JClass cls, TypeDeclaration object) {
 		MethodDeclaration[] met = object.getMethods();
 		for (int i = 0; i < met.length; i++) {
@@ -120,7 +127,7 @@ public class JavaParser {
 			while (paramList.hasNext()) {
 				SingleVariableDeclaration sin = (SingleVariableDeclaration) paramList
 						.next();
-				method.parameters.add(sin.getType().toString());
+				sin.getType().toString();
 			}
 			
 			cls.methodDeclarations.add(method);
@@ -129,14 +136,18 @@ public class JavaParser {
 
 public class JClass {
 	String className = null;
+	@SuppressWarnings("rawtypes")
 	ArrayList methodDeclarations = new ArrayList();
+	@SuppressWarnings("rawtypes")
 	ArrayList innerClasses = new ArrayList();
 	String superClass = null;
+	@SuppressWarnings("rawtypes")
 	ArrayList interfaces = new ArrayList();
 }
 
 public class JMethod{
 	String methodName = null;
+	@SuppressWarnings("rawtypes")
 	ArrayList parameters = new ArrayList();
 	String codeBlock = null;
 	String returnType = null;

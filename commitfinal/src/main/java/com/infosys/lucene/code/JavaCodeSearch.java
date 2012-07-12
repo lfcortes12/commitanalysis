@@ -18,7 +18,8 @@ import org.apache.lucene.util.Version;
 public class JavaCodeSearch  {
 
     /** Main for running test case by itself. */
-    public static void main(String args[]) {
+    @SuppressWarnings("deprecation")
+	public static void main(String args[]) {
 		try {
 			File indexDir = new File("C:\\Lucene\\index");
 			String q = "code:JTextField +code:setEditable";

@@ -19,7 +19,8 @@ import com.ibm.icu.text.RuleBasedBreakIterator;
  */
 public class WordTokenizer {
   
-  private final Log log = LogFactory.getLog(getClass());
+  @SuppressWarnings("unused")
+private final Log log = LogFactory.getLog(getClass());
 
   @SuppressWarnings("unchecked")
   private final static Map<Integer,TokenType> RULE_ENTITY_MAP = 

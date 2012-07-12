@@ -33,14 +33,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class AbbreviationRecognizer implements IRecognizer {
 
-  private final Log log = LogFactory.getLog(getClass());
+  @SuppressWarnings("unused")
+private final Log log = LogFactory.getLog(getClass());
   
   private JdbcTemplate jdbcTemplate;
   private Pattern abbrevEmbeddedInWordPattern;
   private Pattern abbrevWithPeriodsPattern;
   private Pattern abbrevWithAllCapsPattern;
   
-  private Set<String> abbreviations = new HashSet<String>();
+  @SuppressWarnings("unused")
+private Set<String> abbreviations = new HashSet<String>();
 
   public AbbreviationRecognizer(DataSource dataSource) {
     super();
@@ -112,11 +114,10 @@ public class AbbreviationRecognizer implements IRecognizer {
     return recognizedTokens;
   }
 
-  @SuppressWarnings("unchecked")
   private boolean isAbbreviation(String abbrevPart) {
     List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-      "select enc_name from co_abbrev where enc_type = ? and enc_name = ?", new String[] {"a", StringUtils.lowerCase(abbrevPart)});
-    for (Map<String,Object> row : rows) {
+      "select enc_name from co_abbrev where enc_type = ? and enc_name = ?", (Object[])(new String[] {"a", StringUtils.lowerCase(abbrevPart)}));
+    for (@SuppressWarnings("unused") Map<String,Object> row : rows) {
       return true;
     }
     return false;

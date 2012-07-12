@@ -87,6 +87,7 @@ public class JavaSourceCodeIndexer {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void addImportDeclarations(Document doc, JavaParser parser) {
 		ArrayList imports = parser.getImportDeclarations();
 		if (imports == null)
@@ -97,6 +98,7 @@ public class JavaSourceCodeIndexer {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void addComments(Document doc, JavaParser parser) {
 		ArrayList comments = parser.getComments();
 		if (comments == null)
@@ -107,6 +109,7 @@ public class JavaSourceCodeIndexer {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void addClass(Document doc, JClass cls) {
 		doc.add(new Field(CLASS, cls.className, Field.Store.YES, Field.Index.ANALYZED));
 		
@@ -129,6 +132,7 @@ public class JavaSourceCodeIndexer {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void addMethods(JClass cls, Document doc) {
 		ArrayList methods = cls.methodDeclarations;
 		for (int i = 0; i < methods.size(); i++) {

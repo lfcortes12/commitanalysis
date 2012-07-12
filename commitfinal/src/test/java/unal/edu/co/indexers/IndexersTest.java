@@ -36,6 +36,7 @@ public class IndexersTest {
 	private IndexReader commitIndexReader;
 	private IndexReader commitDiffIndexReader;
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void setUp() throws Exception {
 		directoryCommitIndex = new SimpleFSDirectory(COMMIT_INDEX_DIR);
@@ -112,6 +113,7 @@ public class IndexersTest {
 				vectorGenerator.getDocumentNames(), new PrintWriter(System.out,true));
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
 	public void testCosineSimilarityWithTfIdfVector() throws Exception {
 		vectorGenerator.generateVector(documents);

@@ -19,9 +19,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class PhraseRecognizer implements IRecognizer {
 
+  @SuppressWarnings("unused")
   private final Log log = LogFactory.getLog(getClass());
   
   private JdbcTemplate jdbcTemplate;
+  @SuppressWarnings("unused")
   private Map<String,String> phraseMap;
   
   public PhraseRecognizer(DataSource dataSource) {
@@ -35,7 +37,6 @@ public class PhraseRecognizer implements IRecognizer {
   
   public void init() throws Exception { /* :NOOP: */ }
 
-  @SuppressWarnings("unchecked")
   public List<Token> recognize(List<Token> tokens) {
     List<Token> extractedTokens = new ArrayList<Token>();
     int numTokens = tokens.size();
@@ -51,7 +52,7 @@ public class PhraseRecognizer implements IRecognizer {
       String word = token.getValue();
       List<Map<String,Object>> rows = jdbcTemplate.queryForList(
         "select coc_phrase, coc_num_words from my_colloc where coc_lead_word = ?", 
-        new String[] {StringUtils.lowerCase(word)});
+        (Object[])(new String[] {StringUtils.lowerCase(word)}));
       for (Map<String,Object> row : rows) {
         String phrase = (String) row.get("COC_PHRASE");
         int numWords = (Integer) row.get("COC_NUM_WORDS");
@@ -73,7 +74,8 @@ public class PhraseRecognizer implements IRecognizer {
     return extractedTokens;
   }
 
-  private String getInputPhrase(List<Token> tokens, int start, int length) {
+  @SuppressWarnings("unused")
+private String getInputPhrase(List<Token> tokens, int start, int length) {
     List<Token> tokenSublist = tokens.subList(start, start + length);
     StringBuilder phraseBuilder = new StringBuilder();
     for (Token token : tokenSublist) {
