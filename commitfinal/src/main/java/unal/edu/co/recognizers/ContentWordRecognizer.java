@@ -27,6 +27,11 @@ public class ContentWordRecognizer implements IRecognizer {
   public void init() throws Exception {
     this.dictionary = new Dictionary(new URL("file", null, "/home/fernando/Desarrollo/wordnet/dict"));
     dictionary.open();
+
+  }
+  
+  public void closeDictionary() {
+	  dictionary.close();
   }
 
   public List<Token> recognize(List<Token> tokens) {

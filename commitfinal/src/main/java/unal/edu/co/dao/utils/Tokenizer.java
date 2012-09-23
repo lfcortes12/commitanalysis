@@ -1,9 +1,11 @@
 package unal.edu.co.dao.utils;
 
+import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,7 +48,6 @@ public class Tokenizer {
 		String tokens = "";
 		try {
 			StreamTokenizer st = new StreamTokenizer(reader);
-
 			// Prepare the tokenizer for Java-style tokenizing rules
 			st.parseNumbers();
 			st.wordChars('_', '_');
@@ -137,6 +138,87 @@ public class Tokenizer {
 			//System.out.println("terminó de procesar el diff" + tokens);
 		} catch (Exception ioe) {
 			ioe.printStackTrace();
+		}
+		return tokens;
+	}
+	
+	@SuppressWarnings("unused")
+	public static String diffProccessing(String diff) throws IOException {
+		Scanner scanner = new Scanner(diff);
+		StreamTokenizer st = null;
+		List<String> packagesImported = new ArrayList<String>();
+		List<String> constantes = new ArrayList<String>();
+		String tokens = "";
+		int i = 0;
+		try {
+			while (scanner.hasNextLine()) {
+				System.out.println("Va en la linea: " + i);
+				String lineString = scanner.nextLine();
+				if ((lineString.trim().startsWith("+") && !lineString.trim().startsWith("++"))
+						|| (lineString.trim().startsWith("-") && !lineString.trim().startsWith("--"))) {
+					st = new StreamTokenizer(new StringReader(lineString));
+					st.parseNumbers();
+					st.wordChars('_', '_');
+					st.eolIsSignificant(true);
+					// If whitespace is not to be discarded, make this call
+					st.ordinaryChars(0, ' ');
+					// These calls caused comments to be discarded
+					st.slashSlashComments(true);
+					st.slashStarComments(true);
+					// Parse the file
+					int token = st.nextToken();
+					while (token != StreamTokenizer.TT_EOF) {
+						token = st.nextToken();
+						//System.out.println("----" + st);
+						switch (token) {
+						case StreamTokenizer.TT_WORD:
+							// A word was found; the value is in sval
+							String word = st.sval;
+							tokens += " ";
+							if(word.endsWith(".*")) {
+								//System.out.println("PALABRA QUE ES ------"+word);
+							}
+							if(word.toLowerCase().contains("exception") || isUpperCaseString(word) || isImportPackage(word) || word.equals("import") || word.equals("package")) {
+								if(isUpperCaseString(word) && word.contains("_") || !isImportPackage(word) && isUpperCaseString(word)) {
+									word = word.replaceAll("_", " ").toLowerCase();
+									constantes.add(word);
+									tokens += word.toString().toLowerCase();
+								} else {
+									packagesImported.add(word);
+								}
+								if(isImportORPackageWord(word)) {
+									isImportORPackageLine = true;
+								} else {
+									isImportORPackageLine = false;
+								}
+								
+							} else {
+								isImportORPackageLine = false;
+								if(word.contains("_")) {
+									word = word.replaceAll("_", " ").toLowerCase();
+								}
+								word =  word.replaceAll(String.format("%s|%s|%s","(?<=[A-Z])(?=[A-Z][a-z])","(?<=[^A-Z])(?=[A-Z])","(?<=[A-Za-z])(?=[^A-Za-z])")," ").toLowerCase();
+								if(word.contains(".")) {
+									tokens +=  word.replaceAll(".","").toLowerCase();
+								} else if(word.contains("_")) {
+									packagesImported.add(word);
+								} else {
+									tokens +=  word.toLowerCase();
+								}
+							}
+							break;
+						default:
+							// A regular character was found; the value is the token
+							// itself
+							char ch = (char) st.ttype;
+							break;
+						}
+					}
+					}
+				i++;
+				}
+		} finally {
+			scanner.close();
 		}
 		return tokens;
 	}

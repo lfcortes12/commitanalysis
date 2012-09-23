@@ -34,5 +34,15 @@ public class CommitDiffDao extends GenericDaoJpaImpl<CommitDiff, String> {
 		List<CommitDiff> commitsDiff = (List<CommitDiff>) query.getResultList();
 		return commitsDiff;
 	}
+	
+	public boolean updateCommitDiff(CommitDiff diff) {
+			entityManager.getTransaction().begin();
+			CommitDiff commitdiffx = entityManager.find(CommitDiff.class,diff.getChangeset());
+			commitdiffx.setDiff(diff.getDiff());
+			commitdiffx.setProcessedDiff(diff.getProcessedDiff());
+			commitdiffx.setProjectName(diff.getProjectName());
+			entityManager.getTransaction().commit();
+			return true;
+		}
 
 }

@@ -48,42 +48,47 @@ public class VectorGenerator {
     this.dataSource = dataSource;
   }
 
-  public void generateVector(Map<String,Reader> documents) throws Exception {
-    Map<String,Bag<String>> documentWordFrequencyMap = new HashMap<String,Bag<String>>();
-    SortedSet<String> wordSet = new TreeSet<String>();
-    Integer docId = 0;
-    for (String key : documents.keySet()) {
-      String text = getText(documents.get(key));
-      Bag<String> wordFrequencies = getWordFrequencies(text);
-      wordSet.addAll(wordFrequencies.uniqueSet());
-      documentWordFrequencyMap.put(key, wordFrequencies);
-      documentIdNameMap.put(docId, key);
-      docId++;
-    }
-    // create a Map of ids to words from the wordSet
-    int wordId = 0;
-    for (String word : wordSet) {
-      wordIdValueMap.put(wordId, word);
-      wordId++;
-    }
-    // we need a documents.keySet().size() x wordSet.size() matrix to hold
-    // this info
-    int numDocs = documents.keySet().size();
-    int numWords = wordSet.size();
-    matrix = new OpenMapRealMatrix(numWords, numDocs);
-    for (int i = 0; i < matrix.getRowDimension(); i++) {
-      for (int j = 0; j < matrix.getColumnDimension(); j++) {
-        String docName = documentIdNameMap.get(j);
-        Bag<String> wordFrequencies = documentWordFrequencyMap.get(docName);
-        String word = wordIdValueMap.get(i);
-        int count = wordFrequencies.getCount(word);
-        matrix.setEntry(i, j, count);
-      }
-    }
-  }
+	public void generateVector(Map<String, Reader> documents) throws Exception {
+		System.out.println("acabo de entrar generateVector");
+		Map<String, Bag<String>> documentWordFrequencyMap = new HashMap<String, Bag<String>>();
+		SortedSet<String> wordSet = new TreeSet<String>();
+		Integer docId = 0;
+		for (String key : documents.keySet()) {
+			System.out.println("key: " + key);
+			String text = getText(documents.get(key));
+			Bag<String> wordFrequencies = getWordFrequencies(text);
+			wordSet.addAll(wordFrequencies.uniqueSet());
+			documentWordFrequencyMap.put(key, wordFrequencies);
+			documentIdNameMap.put(docId, key);
+			docId++;
+		}
+		// create a Map of ids to words from the wordSet
+		int wordId = 0;
+		for (String word : wordSet) {
+			wordIdValueMap.put(wordId, word);
+			wordId++;
+		}
+		// we need a documents.keySet().size() x wordSet.size() matrix to hold
+		// this info
+		int numDocs = documents.keySet().size();
+		int numWords = wordSet.size();
+		matrix = new OpenMapRealMatrix(numWords, numDocs);
+		System.out.println("va a generar el vector de frecuencias");
+		for (int i = 0; i < matrix.getRowDimension(); i++) {
+			for (int j = 0; j < matrix.getColumnDimension(); j++) {
+				String docName = documentIdNameMap.get(j);
+				Bag<String> wordFrequencies = documentWordFrequencyMap.get(docName);
+				String word = wordIdValueMap.get(i);
+				int count = wordFrequencies.getCount(word);
+				matrix.setEntry(i, j, count);
+			}
+		}
+		System.out.println("acabo de terminar generateVector");
+	}
 
   public RealMatrix getMatrix() {
-    return matrix;
+	  System.out.println("va a devolver RealMatrix");
+      return matrix;
   }
   
   public String[] getDocumentNames() {
@@ -117,13 +122,14 @@ public class VectorGenerator {
     while ((token = wordTokenizer.nextToken()) != null) {
       tokens.add(token);
     }
+    ContentWordRecognizer contentWordRecognizer = new ContentWordRecognizer();
     RecognizerChain recognizerChain = new RecognizerChain(
         Arrays.asList(new IRecognizer[] {
         new BoundaryRecognizer(),
         new AbbreviationRecognizer(dataSource),
         new PhraseRecognizer(dataSource),
         new StopwordRecognizer(),
-        new ContentWordRecognizer()
+        contentWordRecognizer
     }));
     recognizerChain.init();
     List<Token> recognizedTokens = recognizerChain.recognize(tokens);
@@ -135,6 +141,7 @@ public class VectorGenerator {
         wordBag.add(StringUtils.lowerCase(recognizedToken.getValue()));
       }
     }
+    contentWordRecognizer.closeDictionary();
     return wordBag;
   }
 

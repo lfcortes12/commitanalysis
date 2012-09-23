@@ -164,6 +164,27 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<version>2.4</version>
+			<configuration>
+				<archive>
+					<index>true</index>
+					<manifest>
+						<addClasspath>true</addClasspath>
+					</manifest>
+					<manifestEntries>
+						<mode>development</mode>
+						<Main-Class>unal.edu.co.main.Main</Main-Class>
+					</manifestEntries>
+				</archive>
+			</configuration>
+		</plugin>
+	</plugins>
+  </build>
 	<repositories>
 		<repository>
 			<id>EclipseLink Repo</id>

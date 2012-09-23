@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -39,37 +40,42 @@ public class PhraseRecognizer implements IRecognizer {
 
   public List<Token> recognize(List<Token> tokens) {
     List<Token> extractedTokens = new ArrayList<Token>();
-    int numTokens = tokens.size();
-    TOKEN_LOOP:
-    for (int i = 0; i < numTokens; i++) {
-      Token token = tokens.get(i);
-      TokenType type = token.getType();
-      if (type != TokenType.WORD) {
-        // we don't care about phrases that begin with types other than word
-        extractedTokens.add(token);
-        continue;
-      }
-      String word = token.getValue();
-      List<Map<String,Object>> rows = jdbcTemplate.queryForList(
-        "select coc_phrase, coc_num_words from my_colloc where coc_lead_word = ?", 
-        (Object[])(new String[] {StringUtils.lowerCase(word)}));
-      for (Map<String,Object> row : rows) {
-        String phrase = (String) row.get("COC_PHRASE");
-        int numWords = (Integer) row.get("COC_NUM_WORDS");
-        if (numTokens > i + numWords) {
-          // we don't want to look beyond the actual size of the sentence
-          String inputPhrase = getInputPhrase(tokens, i, numWords);
-          if (phrase.equals(inputPhrase)) {
-            extractedTokens.add(new Token(phrase + "|||" + numWords, TokenType.PHRASE));
-            // move the pointer forward (numWords - 1)
-            i += (numWords - 1);
-            continue TOKEN_LOOP;
-          }
-        }
-      }
-      // if we came this far, then there is no phrase starting at
-      // this position...pass through
-      extractedTokens.add(token);
+    try {
+	    int numTokens = tokens.size();
+	    TOKEN_LOOP:
+	    for (int i = 0; i < numTokens; i++) {
+	      Token token = tokens.get(i);
+	      TokenType type = token.getType();
+	      if (type != TokenType.WORD) {
+	        // we don't care about phrases that begin with types other than word
+	        extractedTokens.add(token);
+	        continue;
+	      }
+	      String word = token.getValue();
+	      
+	      List<Map<String,Object>> rows = jdbcTemplate.queryForList(
+	        "select coc_phrase, coc_num_words from my_colloc where coc_lead_word = ?", 
+	        (Object[])(new String[] {StringUtils.lowerCase(word)}));
+	      for (Map<String,Object> row : rows) {
+	        String phrase = (String) row.get("COC_PHRASE");
+	        int numWords = (Integer) row.get("COC_NUM_WORDS");
+	        if (numTokens > i + numWords) {
+	          // we don't want to look beyond the actual size of the sentence
+	          String inputPhrase = getInputPhrase(tokens, i, numWords);
+	          if (phrase.equals(inputPhrase)) {
+	            extractedTokens.add(new Token(phrase + "|||" + numWords, TokenType.PHRASE));
+	            // move the pointer forward (numWords - 1)
+	            i += (numWords - 1);
+	            continue TOKEN_LOOP;
+	          }
+	        }
+	      }
+	      // if we came this far, then there is no phrase starting at
+	      // this position...pass through
+	      extractedTokens.add(token);
+	    }
+    } catch (CannotGetJdbcConnectionException ex) {
+    	 System.out.println("Ocurrio un problema al conectarse a la base de datos");
     }
     return extractedTokens;
   }

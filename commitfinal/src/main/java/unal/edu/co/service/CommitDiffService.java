@@ -44,4 +44,10 @@ public class CommitDiffService {
 		return dao.findByChangeSetPaging(page, pageSize);
 	}
 	
+	public CommitDiff update(CommitDiff commitDiff) {
+		dao = new CommitDiffDao();
+		dao.updateCommitDiff(commitDiff);
+		return commitDiff;
+	}
+	
 }
