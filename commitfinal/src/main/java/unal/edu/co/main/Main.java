@@ -18,11 +18,15 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import unal.edu.co.dao.commit.Index.IndexCommit;
 import unal.edu.co.dao.commit.Index.IndexDiff;
 import unal.edu.co.indexers.LsiIndexer;
+import unal.edu.co.indexers.LsiJamaIndexer;
 import unal.edu.co.indexers.VectorGenerator;
 import unal.edu.co.service.CommitDiffService;
 import unal.edu.co.service.CommitService;
 import unal.edu.co.service.ConcreteDiffService;
 import unal.edu.co.similarity.CosineSimilarity;
+import unal.edu.co.similarity.CosineSimilarityJama;
+
+import Jama.Matrix;
 
 import com.mysql.jdbc.Driver;
 
@@ -127,8 +131,25 @@ public class Main {
 		}
 		writer.flush();
 	}
+	
+	private static void prettyPrintMatrix(String legend, Matrix matrix,String[] documentNames, String[] words, PrintWriter writer) {
+		writer.printf("=== %s ===%n", legend);
+		writer.printf(";", " ");
+		for (int i = 0; i < documentNames.length; i++) {
+			writer.printf("%s;", documentNames[i]);
+		}
+		writer.println();
+		for (int i = 0; i < words.length; i++) {
+			writer.printf("%1s;", words[i]);
+			for (int j = 0; j < documentNames.length; j++) {
+				writer.printf("%f;", matrix.get(i, j));
+			}
+			writer.println();
+		}
+		writer.flush();
+	}
 
-	private static void prettyPrintMatrix(String legend, RealMatrix matrix,String[] documentNames, PrintWriter writer) {
+	private static void prettyPrintMatrix(String legend, Matrix matrix,String[] documentNames, PrintWriter writer) {
 		writer.printf("=== %s ===%n", legend);
 		writer.printf("%s;", " ");
 		for (int i = 0; i < documentNames.length; i++) {
@@ -138,7 +159,7 @@ public class Main {
 		for (int i = 0; i < documentNames.length; i++) {
 			writer.printf("%s;", documentNames[i]);
 			for (int j = 0; j < documentNames.length; j++) {
-				writer.printf("%f;", matrix.getEntry(i, j));
+				writer.printf("%f;", matrix.get(i, j));
 			}
 			writer.println();
 		}
@@ -157,6 +178,21 @@ public class Main {
 		CosineSimilarity cosineSimilarity = new CosineSimilarity();
 		RealMatrix similarity = cosineSimilarity.transform(lsiMatrix);
 		File cosineFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinesimilarity.txt");
+		//prettyPrintMatrix("Cosine Similarity (LSI)", similarity,vectorGenerator.getDocumentNames(), new PrintWriter(cosineFile));
+	}
+	
+	public static void generateLsiJamaIndexer() throws Exception {
+		System.out.println("acabo de entrar generateLsiIndexer");
+		vectorGenerator.generateVector(documents);
+		LsiJamaIndexer indexer = new LsiJamaIndexer();
+		System.out.println("acabo de crear LsiIndexer");
+		Matrix lsiMatrix = indexer.transform(vectorGenerator.getMatrix());
+		System.out.println("acabo de crear la matriz LsiIndexer");
+		File file = new File("/home/fernando/Desarrollo/resultados/lsi/lsi.txt");
+		prettyPrintMatrix("Latent Semantic (LSI)", lsiMatrix,vectorGenerator.getDocumentNames(), vectorGenerator.getWords(),new PrintWriter(file));
+		CosineSimilarityJama cosineSimilarity = new CosineSimilarityJama();
+		Matrix similarity = cosineSimilarity.transformToMatrix(lsiMatrix);
+		File cosineFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinesimilarity.txt");
 		prettyPrintMatrix("Cosine Similarity (LSI)", similarity,vectorGenerator.getDocumentNames(), new PrintWriter(cosineFile));
 	}
 
@@ -167,7 +203,7 @@ public class Main {
 		System.out.println("Va a iniciar");
 		try {
 			setContext();
-			generateLsiIndexer();
+			generateLsiJamaIndexer();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

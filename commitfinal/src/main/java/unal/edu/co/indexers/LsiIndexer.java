@@ -23,21 +23,16 @@ public class LsiIndexer implements Transformer<RealMatrix, RealMatrix> {
 		RealMatrix documentVector = svd.getV();
 		// compute the value of k (ie where to truncate)
 		int k = (int) Math.floor(Math.sqrt(matrix.getColumnDimension()));
-		RealMatrix reducedWordVector = wordVector.getSubMatrix(0,
-				wordVector.getRowDimension() - 1, 0, k - 1);
+		RealMatrix reducedWordVector = wordVector.getSubMatrix(0,wordVector.getRowDimension() - 1, 0, k - 1);
 		RealMatrix reducedSigma = sigma.getSubMatrix(0, k - 1, 0, k - 1);
-		RealMatrix reducedDocumentVector = documentVector.getSubMatrix(0,
-				documentVector.getRowDimension() - 1, 0, k - 1);
-		RealMatrix weights = reducedWordVector.multiply(reducedSigma).multiply(
-				reducedDocumentVector.transpose());
+		RealMatrix reducedDocumentVector = documentVector.getSubMatrix(0,documentVector.getRowDimension() - 1, 0, k - 1);
+		RealMatrix weights = reducedWordVector.multiply(reducedSigma).multiply(reducedDocumentVector.transpose());
 		// Phase 2: normalize the word scores for a single document
 		for (int j = 0; j < weights.getColumnDimension(); j++) {
-			double sum = sum(weights.getSubMatrix(0,
-					weights.getRowDimension() - 1, j, j));
+			double sum = sum(weights.getSubMatrix(0,weights.getRowDimension() - 1, j, j));
 			for (int i = 0; i < weights.getRowDimension(); i++) {
 				if (sum > 0.0D) {
-					weights.setEntry(i, j,
-							Math.abs((weights.getEntry(i, j)) / sum));
+					weights.setEntry(i, j,Math.abs((weights.getEntry(i, j)) / sum));
 				} else {
 					weights.setEntry(i, j, 0.0D);
 				}
@@ -45,7 +40,7 @@ public class LsiIndexer implements Transformer<RealMatrix, RealMatrix> {
 		}
 		return weights;
 	}
-
+	
 	private double sum(RealMatrix colMatrix) {
 		double sum = 0.0D;
 		for (int i = 0; i < colMatrix.getRowDimension(); i++) {

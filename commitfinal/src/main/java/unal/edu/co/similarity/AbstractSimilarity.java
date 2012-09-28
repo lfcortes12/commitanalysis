@@ -28,6 +28,6 @@ public abstract class AbstractSimilarity implements Transformer<RealMatrix,RealM
     }
     return similarityMatrix;
   }
-
+  
   public abstract double computeSimilarity(RealMatrix sourceDoc, RealMatrix targetDoc);
 }
