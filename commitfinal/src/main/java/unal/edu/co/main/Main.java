@@ -23,9 +23,7 @@ import unal.edu.co.indexers.VectorGenerator;
 import unal.edu.co.service.CommitDiffService;
 import unal.edu.co.service.CommitService;
 import unal.edu.co.service.ConcreteDiffService;
-import unal.edu.co.similarity.CosineSimilarity;
 import unal.edu.co.similarity.CosineSimilarityJama;
-
 import Jama.Matrix;
 
 import com.mysql.jdbc.Driver;
@@ -49,29 +47,7 @@ public class Main {
 		IndexCommit indexCommit = new IndexCommit();
 		
 		List<String> changesetlist = new ArrayList<String>();
-		/*for(int i = 1; i < indexDiff.getMaxDocIndex() / 35; i++) {
-			String changeset = "";
-			try {
-				Document commit = indexCommit.getCommit(i);
-				changeset =  commit.get("changeset");
-				Document diff = indexDiff.searchDiff(changeset);
-				if(commit != null && diff != null) {
-					System.out.println("procesando commit: " + i + " changeset: " + changeset);
-					String message = commit.get("message");
-					changeset =  commit.get("changeset");
-					String diffText = diff.get("diffwords");
-					if (message != null && !"".equals(message) && diffText != null && !"".equals(diffText)) {
-						documents.put("C" + i, new StringReader(message));
-						documents.put("C" + i + "-DIFF", new StringReader(diffText));
-						changesetlist.add(changeset);
-					}
-				}
-			} catch (CorruptIndexException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} 
-		}*/
+		
 		List<Document> commits = new ArrayList<Document>();
 		List<String> changesets = new ArrayList<String>();
 		for (String project : projects) {
@@ -153,15 +129,38 @@ public class Main {
 		writer.printf("=== %s ===%n", legend);
 		writer.printf("%s;", " ");
 		for (int i = 0; i < documentNames.length; i++) {
-			writer.printf("%s;", documentNames[i]);
+			if(documentNames[i].contains("DIFF")) {
+				writer.printf("%s;", documentNames[i]);
+			}
 		}
 		writer.println();
 		for (int i = 0; i < documentNames.length; i++) {
-			writer.printf("%s;", documentNames[i]);
-			for (int j = 0; j < documentNames.length; j++) {
-				writer.printf("%f;", matrix.get(i, j));
+			if(!documentNames[i].contains("DIFF")) {
+				writer.printf("%s;", documentNames[i]);
+				for (int j = 0; j < documentNames.length; j++) {
+					if(j%2 == 1) {
+						writer.printf("%f;", matrix.get(i, j));
+					}
+				}
+				writer.println();
 			}
-			writer.println();
+		}
+		writer.flush();
+	}
+	
+	private static void prettyNormalPrintMatrix(String legend, Matrix matrix,String[] documentNames, PrintWriter writer) {
+		writer.printf("=== %s ===%n", legend);
+		writer.printf("%s;", " ");
+		for (int i = 0; i < documentNames.length; i++) {
+				writer.printf("%s;", documentNames[i]);
+		}
+		writer.println();
+		for (int i = 0; i < documentNames.length; i++) {
+				writer.printf("%s;", documentNames[i]);
+				for (int j = 0; j < documentNames.length; j++) {
+						writer.printf("%f;", matrix.get(i, j));
+					}
+				writer.println();
 		}
 		writer.flush();
 	}
@@ -175,9 +174,9 @@ public class Main {
 		System.out.println("acabo de crear la matriz LsiIndexer");
 		File file = new File("/home/fernando/Desarrollo/resultados/lsi/lsi.txt");
 		prettyPrintMatrix("Latent Semantic (LSI)", lsiMatrix,vectorGenerator.getDocumentNames(), vectorGenerator.getWords(),new PrintWriter(file));
-		CosineSimilarity cosineSimilarity = new CosineSimilarity();
-		RealMatrix similarity = cosineSimilarity.transform(lsiMatrix);
-		File cosineFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinesimilarity.txt");
+		//CosineSimilarity cosineSimilarity = new CosineSimilarity();
+		//RealMatrix similarity = cosineSimilarity.transform(lsiMatrix);
+		//File cosineFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinesimilarity.txt");
 		//prettyPrintMatrix("Cosine Similarity (LSI)", similarity,vectorGenerator.getDocumentNames(), new PrintWriter(cosineFile));
 	}
 	
@@ -194,6 +193,8 @@ public class Main {
 		Matrix similarity = cosineSimilarity.transformToMatrix(lsiMatrix);
 		File cosineFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinesimilarity.txt");
 		prettyPrintMatrix("Cosine Similarity (LSI)", similarity,vectorGenerator.getDocumentNames(), new PrintWriter(cosineFile));
+		File cosineTotalFile = new File("/home/fernando/Desarrollo/resultados/lsi/cosinetotalsimilarity.txt");
+		prettyNormalPrintMatrix("Cosine Similarity (LSI)", similarity,vectorGenerator.getDocumentNames(), new PrintWriter(cosineTotalFile));
 	}
 
 	/**

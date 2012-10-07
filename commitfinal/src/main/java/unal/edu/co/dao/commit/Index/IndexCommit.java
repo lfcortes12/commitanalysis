@@ -102,7 +102,7 @@ public class IndexCommit {
 	        }
 	        else {
 	            //ScoreDoc []docs = hits.scoreDocs;
-	            int tamanoMuestra = (int) Math.floor(hits.totalHits * 0.005);
+	            int tamanoMuestra = (int) Math.floor(hits.totalHits * 0.02);
 	            int total = tamanoMuestra + 1;
 	            NumeroAleatorio na = new NumeroAleatorio(1,tamanoMuestra);   
 			    for(int i = 0; i < total;i++){
